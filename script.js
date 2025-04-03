@@ -80,4 +80,34 @@ window.onload = function(){
     
         outputElement.innerHTML = a
     }
+    
+    document.getElementById("btn_op_sqrt").onclick = function() {
+        let a = prompt("Введите коэффициент a:");
+        let b = prompt("Введите коэффициент b:");
+        let c = prompt("Введите коэффициент c:");
+        
+        a = parseFloat(a);
+        b = parseFloat(b);
+        c = parseFloat(c);
+        
+        if (isNaN(a) || isNaN(b) || isNaN(c)) {
+          alert("Некорректный ввод данных");
+          return;
+        }
+        
+        let discriminant = b * b - 4 * a * c;
+        let result;
+        if (discriminant > 0) {
+          let x1 = (-b + Math.sqrt(discriminant)) / (2 * a);
+          let x2 = (-b - Math.sqrt(discriminant)) / (2 * a);
+          result = `x₁ = ${x1}, x₂ = ${x2}`;
+        } else if (discriminant === 0) {
+          let x = -b / (2 * a);
+          result = `x = ${x}`;
+        } else {
+          result = "∅";
+        }
+        document.getElementById("result").innerHTML = result;
     };
+     
+};
