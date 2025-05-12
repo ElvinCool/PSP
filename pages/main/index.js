@@ -31,6 +31,22 @@ function diff(arr1, arr2) {
     return result;
 }
 
+function isPalindrom1(str) {
+    if (typeof str !== 'string' && typeof str !== 'number') return false;
+    const normalized = String(str).toLowerCase().replace(/[^a-zа-я0-9]/gi, '');
+    return normalized === normalized.split('').reverse().join('');
+}
+
+function isPalindrom2(str) {
+    if (typeof str !== 'string' && typeof str !== 'number') return false;
+    const s = String(str).toLowerCase().replace(/[^a-zа-я0-9]/gi, '');
+    for (let i = 0; i < s.length / 2; i++) {
+        if (s[i] !== s[s.length - 1 - i]) return false;
+    }
+    return true;
+}
+
+
 export class MainPage {
     constructor(parent) {
         this.parent = parent;
@@ -119,14 +135,12 @@ export class MainPage {
             moveControls.appendChild(upBtn);
             moveControls.appendChild(downBtn);
 
-            // 👥 Кнопка "Показать участников"
             const showBtn = document.createElement("button");
             showBtn.className = "btn btn-sm btn-outline-primary";
             showBtn.textContent = "Показать участников";
 
-            // Кнопка "Сравнить участников"
             const compareBtn = document.createElement("button");
-            compareBtn.className = "btn btn-sm btn-outline-success";
+            compareBtn.className = "btn btn-sm btn-outline-secondary";
             compareBtn.textContent = "Сравнить участников";
 
             const showControls = document.createElement("div");
@@ -134,9 +148,25 @@ export class MainPage {
             showControls.appendChild(moveControls);
             showControls.appendChild(showBtn);
             showControls.appendChild(compareBtn);
+
+            
+            const palindromeBtn = document.createElement("button");
+            palindromeBtn.className = "btn btn-sm btn-outline-dark";
+            palindromeBtn.textContent = "Палиндром?";
+            showControls.appendChild(palindromeBtn);
+
+            palindromeBtn.addEventListener("click", () => {
+                const title = item.title;
+                const result1 = isPalindrom1(title);
+                const result2 = isPalindrom2(title);
+                alert(`Проверка названия сообщества "${title}":
+Метод 1: ${result1 ? "Палиндром" : "Не палиндром"}
+Метод 2: ${result2 ? "Палиндром" : "Не палиндром"}`);
+            });
+
+
             actionArea.appendChild(showControls);
 
-            // 👤 Блок участников
             const detailsBlock = document.createElement("div");
             detailsBlock.style.display = "none";
             detailsBlock.classList.add("mt-2", "p-2", "bg-light", "rounded", "border");
@@ -146,7 +176,6 @@ export class MainPage {
 
             actionArea.appendChild(detailsBlock);
 
-            // Слушатели
             showBtn.addEventListener("click", () => {
                 const isVisible = detailsBlock.style.display === "block";
                 detailsBlock.style.display = isVisible ? "none" : "block";
@@ -164,7 +193,6 @@ export class MainPage {
             list.appendChild(wrapper);
         });
 
-        // Стрелки
         list.querySelectorAll('button[data-dir]').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const index = parseInt(e.target.dataset.index);
@@ -178,7 +206,6 @@ export class MainPage {
             });
         });
 
-        // Поиск
         document.getElementById("search-btn").addEventListener("click", () => {
             const query = document.getElementById("search-input").value.toLowerCase();
             const results = this.data.filter(item => item.title.toLowerCase().includes(query));
@@ -190,7 +217,6 @@ export class MainPage {
         });
 
 
-        // Добавление карточки
         document.getElementById("add-btn").addEventListener("click", () => {
             this.addCard();
         });
