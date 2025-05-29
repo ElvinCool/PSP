@@ -265,24 +265,20 @@ export class MainPage {
             });
 
             editTitleBtn.addEventListener("click", () => {
-                const titleElem = wrapper.querySelector(".card-title"); // или другой селектор заголовка
+                const titleElem = wrapper.querySelector(".card-title"); 
                 if (!titleElem) return;
             
-                // Создаем input с текущим значением
                 const input = document.createElement("input");
                 input.type = "text";
                 input.value = item.title;
-                input.className = "form-control form-control-sm"; // bootstrap классы для стиля (по желанию)
+                input.className = "form-control form-control-sm"; 
             
-                // Заменяем заголовок на input
                 titleElem.replaceWith(input);
                 input.focus();
             
-                // Функция сохранения нового названия
                 function saveTitle() {
                     const newTitle = input.value.trim();
                     if (!newTitle || newTitle === item.title) {
-                        // если пустое или не изменилось, вернуть исходный заголовок
                         input.replaceWith(titleElem);
                         return;
                     }
