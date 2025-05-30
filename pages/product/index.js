@@ -56,7 +56,18 @@ export class ProductPage {
             };
 
             ajax.patch(communitiesUrls.updateCommunitieById(item.id), updated, (res, status) => {
-                    alert("Изменения сохранены");
+                const existingMsg = this.pageRoot.querySelector(".save-success-msg");
+                if (existingMsg) existingMsg.remove();
+                
+                const successMsg = document.createElement("div");
+                successMsg.className = "alert alert-success save-success-msg mt-3";
+                successMsg.textContent = "Изменения сохранены";
+                
+                editBlock.appendChild(successMsg);
+                
+                setTimeout(() => {
+                    successMsg.remove();
+                }, 3000);
                     this.render(); 
             });
         });
