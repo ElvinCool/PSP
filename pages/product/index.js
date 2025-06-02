@@ -4,6 +4,7 @@ import { HeaderComponent } from "../../components/header/index.js";
 import { MainPage } from "../main/index.js";
 import { BackButtonComponent } from "../../components/back-button/index.js";
 import { ProductCardComponent } from "../../components/product-card/index.js";
+import { EditPage } from "../edit/index.js";
 
 export class ProductPage {
     constructor(parent, id) {
@@ -28,49 +29,23 @@ export class ProductPage {
         const product = new ProductCardComponent(this.pageRoot);
         product.render(item);
 
-        const editBlock = document.createElement("div");
-        editBlock.classList.add("mt-4");
+        const editButton = document.createElement("button");
+        editButton.className = "btn btn-outline-success btn-lg mt-3";
+        editButton.textContent = "Изменить данные";
 
-        const titleInput = document.createElement("input");
-        titleInput.className = "form-control mb-2";
-        titleInput.value = item.title;
 
-        const descInput = document.createElement("textarea");
-        descInput.className = "form-control mb-2";
-        descInput.value = item.text;
-
-        const saveButton = document.createElement("button");
-        saveButton.className = "btn btn-primary";
-        saveButton.textContent = "Сохранить изменения";
-
-        editBlock.appendChild(titleInput);
-        editBlock.appendChild(descInput);
-        editBlock.appendChild(saveButton);
-        this.pageRoot.appendChild(editBlock);
-
-        saveButton.addEventListener("click", () => {
-            const updated = {
-                ...item,
-                title: titleInput.value.trim(),
-                text: descInput.value.trim(),
-            };
-
-            ajax.patch(communitiesUrls.updateCommunitieById(item.id), updated, (res, status) => {
-                const existingMsg = this.pageRoot.querySelector(".save-success-msg");
-                if (existingMsg) existingMsg.remove();
-                
-                const successMsg = document.createElement("div");
-                successMsg.className = "alert alert-success save-success-msg mt-3";
-                successMsg.textContent = "Изменения сохранены";
-                
-                editBlock.appendChild(successMsg);
-                
-                setTimeout(() => {
-                    successMsg.remove();
-                }, 3000);
-                    this.render(); 
-            });
+        editButton.addEventListener("click", () => {
+            const editPage = new EditPage(this.parent, item.id);
+            editPage.render();
         });
+
+        const cardContainer = product.cardElement || product.pageRoot || product.root;
+
+        if (cardContainer instanceof HTMLElement) {
+            cardContainer.appendChild(editButton);
+        } else {
+            this.pageRoot.appendChild(editButton); 
+        }
     }
 
     render() {
