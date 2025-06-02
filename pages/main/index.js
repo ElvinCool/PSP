@@ -3,6 +3,7 @@ import { ProductPage } from "../product/index.js";
 import { ajax } from "../../modules/ajax.js";
 import { communitiesUrls } from "../../modules/communitiesUrls.js";
 import { HeaderComponent } from "../../components/header/index.js";
+import { EditPage } from "../edit/index.js";
 
 function concatenate(arr, separator = ', ') {
     if (!Array.isArray(arr)) throw new TypeError("Ожидается массив");
@@ -70,14 +71,14 @@ export class MainPage {
             this.render();
         });
     }
-    
+
     showAddCardForm() {
         if (document.getElementById("new-title")) return;
-    
+
         const formContainer = document.createElement("div");
-        formContainer.id = "new-card-form"; // Уникальный ID
+        formContainer.id = "new-card-form";
         formContainer.classList.add("card", "p-3", "mb-3");
-    
+
         formContainer.innerHTML = `
             <div class="mb-2">
                 <label class="form-label">Название:</label>
@@ -97,38 +98,38 @@ export class MainPage {
             </div>
             <button type="button" class="btn btn-success" id="submit-new-card">Создать</button>
         `;
-    
+
         const container = document.querySelector(".container.mt-3");
         container.insertBefore(formContainer, container.firstChild);
-    
+
         formContainer.querySelector("#submit-new-card").addEventListener("click", (event) => {
             event.preventDefault();
             const title = document.getElementById("new-title").value.trim();
             const participantsInput = document.getElementById("new-participants").value;
             const description = document.getElementById("new-description").value.trim();
             const imageUrl = document.getElementById("new-image-url").value.trim();
-    
+
             if (!title || !description || !imageUrl.startsWith("http")) {
                 alert("Заполните корректно все поля.");
                 return;
             }
-    
+
             const participants = participantsInput.split(",").map(p => p.trim()).filter(Boolean);
             const newCard = { title, participants, src: imageUrl, text: description };
-    
-            ajax.post(communitiesUrls.createCommunitie(), newCard, (createdCard, status) => {
-                    this.data.unshift(createdCard);
-                    const successMessage = document.createElement("div");
-                    successMessage.className = "alert alert-success";
-                    successMessage.textContent = "Новое сообщество успешно создано!";
-                    const mainContainer = document.querySelector(".container.mt-3");
-                    mainContainer.parentNode.insertBefore(successMessage, mainContainer);
 
-                    setTimeout(() => {
-                        successMessage.remove();
-                    }, 3000);
-                    formContainer.remove();
-                    this.render();
+            ajax.post(communitiesUrls.createCommunitie(), newCard, (createdCard, status) => {
+                this.data.unshift(createdCard);
+                const successMessage = document.createElement("div");
+                successMessage.className = "alert alert-success";
+                successMessage.textContent = "Новое сообщество успешно создано!";
+                const mainContainer = document.querySelector(".container.mt-3");
+                mainContainer.parentNode.insertBefore(successMessage, mainContainer);
+
+                setTimeout(() => {
+                    successMessage.remove();
+                }, 3000);
+                formContainer.remove();
+                this.render();
             });
         });
     }
@@ -212,31 +213,25 @@ export class MainPage {
             compareBtn.className = "btn btn-sm btn-outline-secondary";
             compareBtn.textContent = "Сравнить участников";
 
-            const editTitleBtn = document.createElement("button");
-            editTitleBtn.className = "btn btn-sm btn-outline-primary";
-            editTitleBtn.textContent = "✏️ Изменить название";
+            const editPageBtn = document.createElement("button");
+            editPageBtn.className = "btn btn-sm btn-outline-success";
+            editPageBtn.textContent = "Изменить данные";
+            editPageBtn.addEventListener("click", () => {
+                const editPage = new EditPage(this.parent, item.id);
+                editPage.render();
+            });
+
+            const palindromeBtn = document.createElement("button");
+            palindromeBtn.className = "btn btn-sm btn-outline-dark";
+            palindromeBtn.textContent = "Палиндром?";
 
             const showControls = document.createElement("div");
             showControls.classList.add("mt-2", "d-flex", "gap-2", "flex-wrap");
             showControls.appendChild(moveControls);
             showControls.appendChild(showBtn);
             showControls.appendChild(compareBtn);
-            showControls.appendChild(editTitleBtn); 
-
-
-            const palindromeBtn = document.createElement("button");
-            palindromeBtn.className = "btn btn-sm btn-outline-dark";
-            palindromeBtn.textContent = "Палиндром?";
+            showControls.appendChild(editPageBtn);
             showControls.appendChild(palindromeBtn);
-
-            palindromeBtn.addEventListener("click", () => {
-                const title = item.title;
-                const result1 = isPalindrom1(title);
-                const result2 = isPalindrom2(title);
-                alert(`Проверка названия сообщества "${title}":
-Метод 1: ${result1 ? "Палиндром" : "Не палиндром"}
-Метод 2: ${result2 ? "Палиндром" : "Не палиндром"}`);
-            });
 
             actionArea.appendChild(showControls);
 
@@ -248,7 +243,6 @@ export class MainPage {
             detailsBlock.innerHTML = `<div><strong>Участники:</strong> ${participantsStr}</div>`;
 
             actionArea.appendChild(detailsBlock);
-
 
             showBtn.addEventListener("click", () => {
                 const isVisible = detailsBlock.style.display === "block";
@@ -264,42 +258,13 @@ export class MainPage {
                 }
             });
 
-            editTitleBtn.addEventListener("click", () => {
-                const titleElem = wrapper.querySelector(".card-title"); // или другой селектор заголовка
-                if (!titleElem) return;
-            
-                // Создаем input с текущим значением
-                const input = document.createElement("input");
-                input.type = "text";
-                input.value = item.title;
-                input.className = "form-control form-control-sm"; // bootstrap классы для стиля (по желанию)
-            
-                // Заменяем заголовок на input
-                titleElem.replaceWith(input);
-                input.focus();
-            
-                // Функция сохранения нового названия
-                function saveTitle() {
-                    const newTitle = input.value.trim();
-                    if (!newTitle || newTitle === item.title) {
-                        // если пустое или не изменилось, вернуть исходный заголовок
-                        input.replaceWith(titleElem);
-                        return;
-                    }
-                    const updatedItem = { ...item, title: newTitle };
-            
-                    ajax.patch(communitiesUrls.updateCommunitieById(item.id), updatedItem, (data, status) => {
-                        this.data = this.data.map(card => card.id === item.id ? updatedItem : card);
-                        this.render();
-                    });
-                }
-            
-                input.addEventListener("blur", saveTitle);
-                input.addEventListener("keydown", (e) => {
-                    if (e.key === "Enter") {
-                        input.blur();
-                    }
-                });
+            palindromeBtn.addEventListener("click", () => {
+                const title = item.title;
+                const result1 = isPalindrom1(title);
+                const result2 = isPalindrom2(title);
+                alert(`Проверка названия сообщества "${title}":
+Метод 1: ${result1 ? "Палиндром" : "Не палиндром"}
+Метод 2: ${result2 ? "Палиндром" : "Не палиндром"}`);
             });
 
             list.appendChild(wrapper);
